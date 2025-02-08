@@ -1,139 +1,34 @@
+import API.CourierAPI;
+import Service.Courier;
+import Service.ServiceLinks;
 import io.qameta.allure.Description;
-import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import net.datafaker.Faker;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static io.restassured.RestAssured.given;
-import static org.junit.Assert.assertEquals;
+import static org.apache.http.HttpStatus.*;
 import static org.junit.Assert.assertNotNull;
 
 public class CourierLoginTest {
-    private CourierData courier;
+    private Courier courier;
     private int courierId;
+    private CourierAPI courierAPI = new CourierAPI();
+    private Faker faker = new Faker();
 
     @Before
     public void preconditions() {
-        RestAssured.baseURI = "http://qa-scooter.praktikum-services.ru/";
-        // Создали json с курьером
-        courier = new CourierData("Luigi", "159159");
-        // Создали курьера в системе
-        postForCourierCreating(courier);
-    }
+        RestAssured.baseURI = ServiceLinks.BASE_URI;
 
-    @Step("Создание нового курьера. Ручка api/v1/courier")
-    public Response postForCourierCreating (CourierData courier) {
-        System.out.println("Создаётся новый курьер...");
+        // Создали json с рандомными данными курьера
+        String login = faker.name().username();
+        String password = faker.internet().password(3,10);
+        courier = new Courier (login, password);
 
-        Response response =
-                given()
-                        .contentType(ContentType.JSON)
-                        .and()
-                        .body(courier)
-                        .when()
-                        .post("api/v1/courier");
-
-        // вывод сообщения в зависимости от исхода запроса
-        String responseBody = response.then().extract().body().asString();
-        int statusCode = response.getStatusCode();
-        String info = (statusCode == 201)
-                ? String.format("Статус-код: %d. Создан новый курьер.%n", statusCode)
-                : String.format("ВНИМАНИЕ. Тело ответа: %s.%nКурьер не создан. Проверьте тело запроса.%n", responseBody);
-        System.out.println(info);
-
-        return response;
-    }
-
-    @Step("Получение ответа на POST запрос входа курьера в систему. Ручка api/v1/courier/login")
-    public Response postForLoginToTheSystem(CourierData courier) {
-        System.out.println("Выполняется логин курьера в систему...");
-        Response response = given()
-                .contentType(ContentType.JSON)
-                .and()
-                .body(courier)
-                .when()
-                .post("api/v1/courier/login");
-
-        // вывод сообщения в зависимости от исхода запроса
-        String responseBody = response.then().extract().body().asString();
-        int statusCode = response.getStatusCode();
-        String info = (statusCode == 200)
-                ? String.format("Статус-код: %d. Успешный вход в систему.%n", statusCode)
-                : String.format("ВНИМАНИЕ. Тело ответа: %s.%nВход не выполнен. Проверьте тело запроса.%n", responseBody);
-        System.out.println(info);
-
-        return response;
-    }
-
-    @Step("Получение ID курьера. Ручка api/v1/courier/login")
-    public int getCourierId(Response response) {
-        System.out.println("Получаем Id курьера...");
-
-        int courierId = response.then().extract().body().path("id");
-
-        // вывод сообщения в зависимости от исхода запроса
-        String responseBody = response.then().extract().body().asString();
-        int statusCode = response.getStatusCode();
-        String info = (statusCode == 200)
-                ? String.format("Статус-код: %d. Курьеру присвоен Id: %d.%n", statusCode, courierId)
-                : String.format("ВНИМАНИЕ. Тело ответа: %s.%nId курьеру не присвоен, проверьте входные параметры.%n", responseBody);
-        System.out.println(info);
-
-        return courierId;
-    }
-
-    @Step("Проверка статус-кода на POST запрос входа в систему.")
-    public void checkStatusCode(Response response, int expectedStatusCode) {
-        System.out.println("Проверяется статус-код ответа на логин в системе...");
-        int actualStatusCode = response.getStatusCode();
-        System.out.println(String.format("ОР: %d%nФР: %d", expectedStatusCode, actualStatusCode));
-
-        if (actualStatusCode==expectedStatusCode) {
-            System.out.println("Статус-коды совпали.\n");
-        } else {
-            System.out.println("ВНИМАНИЕ. Статус-коды не совпали.\n");
-        }
-
-        assertEquals("Ошибка. Статус-коды не совпали.", expectedStatusCode, actualStatusCode);
-    }
-
-    @Step("Проверка тела ответа на POST запрос входа в систему.")
-    public void checkPostResponseBody(Response response, String expectedResponse) {
-        System.out.println("Проверяется тело ответа...");
-        String actualResponse = response.then().extract().body().asString();
-        System.out.println(String.format("ОР: %s%nФР: %s", expectedResponse, actualResponse));
-
-        if (actualResponse.equals(expectedResponse)) {
-            System.out.println("Тела ответов совпадали.\n");
-        } else {
-            System.out.println("ВНИМАНИЕ. Тела ответов не совпали.\n");
-        }
-
-        assertEquals("Ошибка. Тела ответов не совпали.", expectedResponse, actualResponse);
-    }
-
-    @Step("Удаление курьера из системы. Ручка /api/v1/courier/:id")
-    public void deleteCourier (CourierData courier, int courierId) {
-        System.out.println("Удаляем курьера из БД...");
-
-        Response response = given()
-                .contentType(ContentType.JSON)
-                .and()
-                .body(courier)
-                .when()
-                .delete(String.format("/api/v1/courier/%d", courierId));
-
-        // вывод сообщения в зависимости от исхода запроса
-        String responseBody = response.then().extract().body().asString();
-        int statusCode = response.getStatusCode();
-        String info = (statusCode == 200)
-                ? String.format("Статус-код: %d. Курьер с id %d удалён.%n", statusCode, courierId)
-                : String.format("ВНИМАНИЕ. Тело ответа: %s.%nКурьер с id %d не удалён.%n", responseBody, courierId);
-        System.out.println(info);
+        // Создали курьера
+        courierAPI.postForCourierCreating(courier);
     }
 
     @Test
@@ -143,18 +38,18 @@ public class CourierLoginTest {
             "Проверяется статус-код и тело ответа.")
     public void loginTest() {
         // Отправляем запрос и сохраняем его в переменную
-        Response response = postForLoginToTheSystem(courier);
+        Response response = courierAPI.postForLogin(courier);
 
         // Проверили статус-код на соответствие ожиданиям
-        checkStatusCode(response, 200);
+        courierAPI.assertStatusCode(response, SC_OK);
 
         // Убедились, что в ответе содержится айди курьера
-        courierId = getCourierId(response);
+        courierId = courierAPI.getCourierId(response);
         assertNotNull("Ошибка. В ответе отсутствует айди", courierId);
 
         // Проверили структуру ответа
         String expectedResponseBody = String.format("{id: %d}", courierId);
-        checkPostResponseBody(response, expectedResponseBody);
+        courierAPI.assertResponseBody(response, expectedResponseBody);
     }
 
     @Test
@@ -162,10 +57,10 @@ public class CourierLoginTest {
     @Description ("Убеждаемся, что невозможно войти в систему с пустым логином.")
     public void requiredLoginFieldTest () {
         // Отправляем запрос и сохраняем его в переменную
-        Response response = postForLoginToTheSystem(courier);
+        Response response = courierAPI.postForLogin(courier);
 
         // Получили айди курьера для последующего удаления
-        courierId = getCourierId(response);
+        courierId = courierAPI.getCourierId(response);
 
         System.out.println("Пытаемся войти в систему без логина...");
 
@@ -173,14 +68,14 @@ public class CourierLoginTest {
         courier.setLogin("");
 
         // Снова попытались войти
-        Response negativeResponse = postForLoginToTheSystem(courier);
+        Response negativeResponse = courierAPI.postForLogin(courier);
 
         // Проверили статус-код на соответствие ожиданиям
-        checkStatusCode(negativeResponse, 400);
+        courierAPI.assertStatusCode(negativeResponse, SC_BAD_REQUEST);
 
         // Проверили структуру ответа
         String expectedResponseBody = "{\"message\":  \"Недостаточно данных для входа\"}";
-        checkPostResponseBody(negativeResponse, expectedResponseBody);
+        courierAPI.assertResponseBody(negativeResponse, expectedResponseBody);
     }
 
     @Test
@@ -188,10 +83,10 @@ public class CourierLoginTest {
     @Description ("Убеждаемся, что невозможно войти в систему с пустым паролем.")
     public void requiredPasswordFieldTest () {
         // Отправляем запрос и сохраняем его в переменную
-        Response response = postForLoginToTheSystem(courier);
+        Response response = courierAPI.postForLogin(courier);
 
         // Получили айди курьера для последующего удаления
-        courierId = getCourierId(response);
+        courierId = courierAPI.getCourierId(response);
 
         System.out.println("Пытаемся войти в систему без пароля...");
 
@@ -199,14 +94,14 @@ public class CourierLoginTest {
         courier.setPassword("");
 
         // Снова попытались войти
-        Response negativeResponse = postForLoginToTheSystem(courier);
+        Response negativeResponse = courierAPI.postForLogin(courier);
 
         // Проверили статус-код на соответствие ожиданиям
-        checkStatusCode(negativeResponse, 400);
+        courierAPI.assertStatusCode(negativeResponse, SC_BAD_REQUEST);
 
         // Проверили структуру ответа
         String expectedResponseBody = "{\"message\":  \"Недостаточно данных для входа\"}";
-        checkPostResponseBody(negativeResponse, expectedResponseBody);
+        courierAPI.assertResponseBody(negativeResponse, expectedResponseBody);
     }
 
     @Test
@@ -214,10 +109,10 @@ public class CourierLoginTest {
     @Description ("Убеждаемся, что невозможно войти в систему с неверным логином.")
     public void wrongLoginFieldTest () {
         // Отправляем запрос и сохраняем его в переменную
-        Response response = postForLoginToTheSystem(courier);
+        Response response = courierAPI.postForLogin(courier);
 
         // Получили айди курьера для последующего удаления
-        courierId = getCourierId(response);
+        courierId = courierAPI.getCourierId(response);
 
         System.out.println("Пытаемся снова войти в систему, но с неверным логином...");
 
@@ -225,14 +120,14 @@ public class CourierLoginTest {
         courier.setLogin("LuigiLuigi");
 
         // Снова попытались войти
-        Response negativeResponse = postForLoginToTheSystem(courier);
+        Response negativeResponse = courierAPI.postForLogin(courier);
 
         // Проверили статус-код на соответствие ожиданиям
-        checkStatusCode(negativeResponse, 404);
+        courierAPI.assertStatusCode(negativeResponse, SC_NOT_FOUND);
 
         // Проверили структуру ответа
         String expectedResponseBody = "{\"message\": \"Учетная запись не найдена\"}";
-        checkPostResponseBody(negativeResponse, expectedResponseBody);
+        courierAPI.assertResponseBody(negativeResponse, expectedResponseBody);
     }
 
     @Test
@@ -240,10 +135,10 @@ public class CourierLoginTest {
     @Description ("Убеждаемся, что невозможно войти в систему с неверным паролем.")
     public void wrongPasswordFieldTest () {
         // Отправляем запрос и сохраняем его в переменную
-        Response response = postForLoginToTheSystem(courier);
+        Response response = courierAPI.postForLogin(courier);
 
         // Получили айди курьера для последующего удаления
-        courierId = getCourierId(response);
+        courierId = courierAPI.getCourierId(response);
 
         System.out.println("Пытаемся снова войти в систему, но с неверным паролем...");
 
@@ -251,21 +146,21 @@ public class CourierLoginTest {
         courier.setPassword("159159159159");
 
         // Снова попытались войти
-        Response negativeResponse = postForLoginToTheSystem(courier);
+        Response negativeResponse = courierAPI.postForLogin(courier);
 
         // Проверили статус-код на соответствие ожиданиям
-        checkStatusCode(negativeResponse, 404);
+        courierAPI.assertStatusCode(negativeResponse, SC_NOT_FOUND);
 
         // Проверили структуру ответа
         String expectedResponseBody = "{\"message\": \"Учетная запись не найдена\"}";
-        checkPostResponseBody(negativeResponse, expectedResponseBody);
+        courierAPI.assertResponseBody(negativeResponse, expectedResponseBody);
     }
 
     @After
     public void postconditions() {
         // удаляем курьера
         if (courierId != 0) {
-            deleteCourier(courier, courierId);
+            courierAPI.deleteCourier(courier, courierId);
         }
     }
 }
