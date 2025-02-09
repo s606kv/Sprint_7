@@ -1,6 +1,6 @@
-import API.CourierAPI;
-import Service.Courier;
-import Service.ServiceLinks;
+import api.CourierAPI;
+import service.Courier;
+import service.ServiceLinks;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
@@ -48,8 +48,9 @@ public class CourierLoginTest {
         assertNotNull("Ошибка. В ответе отсутствует айди", courierId);
 
         // Проверили структуру ответа
-        String expectedResponseBody = String.format("{id: %d}", courierId);
-        courierAPI.assertResponseBody(response, expectedResponseBody);
+        String responseBodyKey = "id";
+        String expectedKeyValue = String.format("%d", courierId);
+        courierAPI.assertResponseBody(response, responseBodyKey, expectedKeyValue);
     }
 
     @Test
@@ -74,8 +75,9 @@ public class CourierLoginTest {
         courierAPI.assertStatusCode(negativeResponse, SC_BAD_REQUEST);
 
         // Проверили структуру ответа
-        String expectedResponseBody = "{\"message\":  \"Недостаточно данных для входа\"}";
-        courierAPI.assertResponseBody(negativeResponse, expectedResponseBody);
+        String responseBodyKey = "message";
+        String expectedKeyValue = "Недостаточно данных для входа";
+        courierAPI.assertResponseBody(negativeResponse, responseBodyKey, expectedKeyValue);
     }
 
     @Test
@@ -100,8 +102,9 @@ public class CourierLoginTest {
         courierAPI.assertStatusCode(negativeResponse, SC_BAD_REQUEST);
 
         // Проверили структуру ответа
-        String expectedResponseBody = "{\"message\":  \"Недостаточно данных для входа\"}";
-        courierAPI.assertResponseBody(negativeResponse, expectedResponseBody);
+        String responseBodyKey = "message";
+        String expectedKeyValue = "Недостаточно данных для входа";
+        courierAPI.assertResponseBody(negativeResponse, responseBodyKey, expectedKeyValue);
     }
 
     @Test
@@ -126,8 +129,9 @@ public class CourierLoginTest {
         courierAPI.assertStatusCode(negativeResponse, SC_NOT_FOUND);
 
         // Проверили структуру ответа
-        String expectedResponseBody = "{\"message\": \"Учетная запись не найдена\"}";
-        courierAPI.assertResponseBody(negativeResponse, expectedResponseBody);
+        String responseBodyKey = "message";
+        String expectedKeyValue = "Учетная запись не найдена";
+        courierAPI.assertResponseBody(negativeResponse, responseBodyKey, expectedKeyValue);
     }
 
     @Test
@@ -152,8 +156,9 @@ public class CourierLoginTest {
         courierAPI.assertStatusCode(negativeResponse, SC_NOT_FOUND);
 
         // Проверили структуру ответа
-        String expectedResponseBody = "{\"message\": \"Учетная запись не найдена\"}";
-        courierAPI.assertResponseBody(negativeResponse, expectedResponseBody);
+        String responseBodyKey = "message";
+        String expectedKeyValue = "Учетная запись не найдена";
+        courierAPI.assertResponseBody(negativeResponse, responseBodyKey, expectedKeyValue);
     }
 
     @After

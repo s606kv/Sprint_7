@@ -1,6 +1,6 @@
-import API.CourierAPI;
-import Service.Courier;
-import Service.ServiceLinks;
+import api.CourierAPI;
+import service.Courier;
+import service.ServiceLinks;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
@@ -46,8 +46,9 @@ public class CourierCreatingTest {
         courierId = courierAPI.getCourierId(responseLogin);
 
         // Проверили тело ответа на соответствие документации
-        String expectedResponse = "{\"ok\": true}";
-        courierAPI.assertResponseBody (responseCreate, expectedResponse);
+        String responseBodyKey = "ok";
+        String expectedKeyValue = "true";
+        courierAPI.assertResponseBody (responseCreate, responseBodyKey, expectedKeyValue);
     }
 
     @Test
@@ -76,8 +77,9 @@ public class CourierCreatingTest {
         courierAPI.assertStatusCode (secondResponse, SC_CONFLICT);
 
         // Проверили тело ответа на соответствие документации
-        String expectedResponse = "{\"message\": \"Этот логин уже используется\"}";
-        courierAPI.assertResponseBody (secondResponse, expectedResponse);
+        String responseBodyKey = "message";
+        String expectedKeyValue = "Этот логин уже используется";
+        courierAPI.assertResponseBody (secondResponse, responseBodyKey, expectedKeyValue);
     }
 
     @Test
@@ -101,8 +103,9 @@ public class CourierCreatingTest {
         courierAPI.assertStatusCode (responseCreate, SC_BAD_REQUEST);
 
         // Проверили тело ответа на соответствие документации
-        String expectedResponse = "{\"message\": \"Недостаточно данных для создания учетной записи\"}";
-        courierAPI.assertResponseBody (responseCreate, expectedResponse);
+        String responseBodyKey = "message";
+        String expectedKeyValue = "Недостаточно данных для создания учетной записи";
+        courierAPI.assertResponseBody (responseCreate, responseBodyKey, expectedKeyValue);
     }
 
     @Test
@@ -127,8 +130,9 @@ public class CourierCreatingTest {
         courierAPI.assertStatusCode (responseCreate, SC_BAD_REQUEST);
 
         // Проверили тело ответа на соответствие документации
-        String expectedResponse = "{\"message\": \"Недостаточно данных для создания учетной записи\"}";
-        courierAPI.assertResponseBody (responseCreate, expectedResponse);
+        String responseBodyKey = "message";
+        String expectedKeyValue = "Недостаточно данных для создания учетной записи";
+        courierAPI.assertResponseBody (responseCreate, responseBodyKey, expectedKeyValue);
     }
 
     @After

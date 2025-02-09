@@ -1,7 +1,7 @@
-import API.CourierAPI;
-import API.OrderAPI;
-import Service.Order;
-import Service.ServiceLinks;
+import api.CourierAPI;
+import api.OrderAPI;
+import service.Order;
+import service.ServiceLinks;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;

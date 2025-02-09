@@ -1,4 +1,4 @@
-package Service;
+package service;
 
 public class ServiceLinks {
     public static final String BASE_URI = "http://qa-scooter.praktikum-services.ru/";

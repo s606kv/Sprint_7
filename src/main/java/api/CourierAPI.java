@@ -1,10 +1,10 @@
-package API;
+package api;
 
-import Service.Courier;
+import service.Courier;
 import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import static Service.ServiceLinks.*;
+import static service.ServiceLinks.*;
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_OK;
@@ -29,7 +29,7 @@ public class CourierAPI {
         int statusCode = response.getStatusCode();
         String info = (statusCode == SC_CREATED)
                 ? String.format("Статус-код: %d. Создан новый курьер.%n", statusCode)
-                : String.format("--> ВНИМАНИЕ. Тело ответа: %s.%nКурьер не создан. Проверьте тело запроса.%n", responseBody);
+                : String.format("⚠\uFE0F ВНИМАНИЕ. Тело ответа: %s.%nКурьер не создан. Проверьте тело запроса.%n", responseBody);
         System.out.println(info);
 
         return response;
@@ -50,7 +50,7 @@ public class CourierAPI {
         int statusCode = response.getStatusCode();
         String info = (statusCode == SC_OK)
                 ? String.format("Статус-код: %d. Успешный вход в систему.%n", statusCode)
-                : String.format("--> ВНИМАНИЕ. Тело ответа: %s.%nВход не выполнен. Проверьте тело запроса.%n", responseBody);
+                : String.format("⚠\uFE0F ВНИМАНИЕ. Тело ответа: %s.%nВход не выполнен. Проверьте тело запроса.%n", responseBody);
         System.out.println(info);
 
         return response;
@@ -67,13 +67,13 @@ public class CourierAPI {
         int statusCode = response.getStatusCode();
         String info = (statusCode == SC_OK)
                 ? String.format("Статус-код: %d. Выполнен вход в систему курьера c ID: %d.%n", statusCode, courierId)
-                : String.format("--> ВНИМАНИЕ. Тело ответа: %s.%nВход в систему курьером не выполнен.%n", responseBody);
+                : String.format("⚠\uFE0F ВНИМАНИЕ. Тело ответа: %s.%nВход в систему курьером не выполнен.%n", responseBody);
         System.out.println(info);
 
         return courierId;
     }
 
-    @Step ("Проверка статус-кода на POST запрос.")
+    @Step ("Проверка статус-кода.")
     public void assertStatusCode(Response response, int expectedStatusCode) {
         System.out.println("Проверяется статус-код ответа...");
         int actualStatusCode = response.getStatusCode();
@@ -82,25 +82,25 @@ public class CourierAPI {
         if (actualStatusCode==expectedStatusCode) {
             System.out.println("Статус-коды совпали.\n");
         } else {
-            System.out.println("--> ВНИМАНИЕ. Статус-коды не совпали.\n");
+            System.out.println("⚠\uFE0F ВНИМАНИЕ. Статус-коды не совпали.\n");
         }
 
         assertEquals("Ошибка. Статус-коды не совпали.", expectedStatusCode, actualStatusCode);
     }
 
-    @Step ("Проверка тела ответа на POST запрос.")
-    public void assertResponseBody(Response response, String expectedResponse) {
+    @Step ("Проверка тела ответа.")
+    public void assertResponseBody(Response response, String responseBodyKey, String expectedKeyValue) {
         System.out.println("Проверяется тело ответа...");
-        String actualResponse = response.then().extract().body().asString();
-        System.out.println(String.format("ОР: %s%nФР: %s", expectedResponse, actualResponse));
+        String actualKeyValue = response.then().extract().body().path(responseBodyKey).toString();
+        System.out.println(String.format("ОР: %s%nФР: %s", expectedKeyValue, actualKeyValue));
 
-        if (actualResponse.equals(expectedResponse)) {
+        if (actualKeyValue.equals(expectedKeyValue)) {
             System.out.println("Тела ответов совпадали.\n");
         } else {
-            System.out.println("--> ВНИМАНИЕ. Тела ответов не совпали.\n");
+            System.out.println("⚠\uFE0F ВНИМАНИЕ. Тела ответов не совпали.\n");
         }
 
-        assertEquals("Ошибка. Тела ответов не совпали.", expectedResponse, actualResponse);
+        assertEquals("Ошибка. Тела ответов не совпали.", expectedKeyValue, actualKeyValue);
     }
 
     @Step ("Удаление курьера из системы. Ручка /api/v1/courier/:id")
@@ -119,7 +119,7 @@ public class CourierAPI {
         int statusCode = response.getStatusCode();
         String info = (statusCode == SC_OK)
                 ? String.format("Статус-код: %d. Курьер с id %d удалён.%n", statusCode, courierId)
-                : String.format("--> ВНИМАНИЕ. Тело ответа: %s.%nКурьер с id %d не удалён.%n", responseBody, courierId);
+                : String.format("⚠\uFE0F ВНИМАНИЕ. Тело ответа: %s.%nКурьер с id %d не удалён.%n", responseBody, courierId);
         System.out.println(info);
     }
 

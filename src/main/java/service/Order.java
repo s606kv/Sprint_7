@@ -1,4 +1,4 @@
-package Service;
+package service;
 
 import lombok.*;
 import java.util.List;

@@ -1,6 +1,6 @@
-package API;
+package api;
 
-import Service.Order;
+import service.Order;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.qameta.allure.Step;
@@ -8,10 +8,11 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.util.Map;
 import java.util.Objects;
-import static Service.ServiceLinks.*;
+import static service.ServiceLinks.*;
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_OK;
+import static org.junit.Assert.assertTrue;
 
 public class OrderAPI {
 
@@ -31,7 +32,7 @@ public class OrderAPI {
         int statusCode = response.getStatusCode();
         String info = (statusCode == SC_CREATED)
                 ? String.format("Статус-код: %d. Создан новый заказ.%n", statusCode)
-                : String.format("--> ВНИМАНИЕ. Тело ответа: %s.%nЗаказ не создан. Проверьте тело запроса.%n", responseBody);
+                : String.format("⚠\uFE0F ВНИМАНИЕ. Тело ответа: %s.%nЗаказ не создан. Проверьте тело запроса.%n", responseBody);
         System.out.println(info);
 
         return response;
@@ -42,11 +43,17 @@ public class OrderAPI {
         System.out.println("Проверяется наличие трек номера в теле ответа...");
 
         boolean isTrackExist = response.then().extract().body().path("track")!=null;
+
+        // Вывод информации о наличии содержимого в поле "track"
         if(isTrackExist) {
             System.out.println("В теле ответа содержится трек-номер заказа.\n");
         } else {
-            System.out.println("--> ВНИМАНИЕ. Трек-номер в теле ответа отсутствует.\n");
+            System.out.println("⚠\uFE0F ВНИМАНИЕ. Трек-номер в теле ответа отсутствует.\n");
         }
+
+        // Проверка
+        assertTrue(isTrackExist);
+
     }
 
     @Step ("Получаем трек-номер заказа. Ручка /api/v1/orders")
@@ -60,7 +67,7 @@ public class OrderAPI {
         int statusCode = response.getStatusCode();
         String info = (statusCode == SC_CREATED)
                 ? String.format("Статус-код: %d. Заказу присвоен трек-номер: %d.%n", statusCode, orderTrack)
-                : String.format("--> ВНИМАНИЕ. Тело ответа: %s.%nТрек-номер не получен. Проверьте входные параметры.%n", responseBody);
+                : String.format("⚠\uFE0F ВНИМАНИЕ. Тело ответа: %s.%nТрек-номер не получен. Проверьте входные параметры.%n", responseBody);
         System.out.println(info);
 
         return orderTrack;
@@ -101,7 +108,7 @@ public class OrderAPI {
         if (statusCode == SC_OK) {
             System.out.println(String.format("Статус код: %d", statusCode));
         } else {
-            System.out.println(String.format("--> ВНИМАНИЕ. Статус-код: %d", statusCode));
+            System.out.println(String.format("⚠\uFE0F ВНИМАНИЕ. Статус-код: %d", statusCode));
         }
 
         // Получаем ответ со списком объектов
@@ -131,7 +138,7 @@ public class OrderAPI {
         int statusCode = response.getStatusCode();
         String info = (statusCode == 200)
                 ? String.format("Статус-код: %d. Заказ с трек-номером %d отменён.%n", statusCode, orderTrack)
-                : String.format("--> ВНИМАНИЕ. Тело ответа: %s.%nЗаказ с трек-номером %d не отменён. Проверьте запрос.%n", responseBody, orderTrack);
+                : String.format("⚠\uFE0F ВНИМАНИЕ. Тело ответа: %s.%nЗаказ с трек-номером %d не отменён. Проверьте запрос.%n", responseBody, orderTrack);
         System.out.println(info);
     }
 
